@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/npwxx/tinyApp/issues"
   },
-  "homepage": "https://github.com/npwxx/tinyApp#readme"
+  "homepage": "https://github.com/npwxx/tinyApp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
