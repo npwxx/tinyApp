@@ -17,6 +17,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//stores user login &password info
+const userDatabase = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 //redirects to index page.
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -24,21 +38,36 @@ app.get("/", (req, res) => {
 
 //Brings you to the page to create a new URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: getUsername(req) };
+  let templateVars = { user: getUser(req) };
   res.render("urls_new", templateVars);
-  console.log(getUsername(req));
+  //console.log(getUsername(req));
+});
+
+//Brings you to the register page
+app.get("/register", (req, res) => {
+  let templateVars = { user: getUser(req) };
+  res.render("register", templateVars);
+});
+
+//saves new user registration to userDatabase
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  userDatabase[id] = { id: id, email: req.body.email, password: req.body.password };
+  console.log(userDatabase);
+  res.cookie("userId", id);
+  res.redirect("/urls");
 });
 
 //renders the index page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: getUsername(req) };
+  let templateVars = { urls: urlDatabase, user: getUser(req) };
   res.render("urls_index", templateVars);
 });
 
 //renders a page where you can edit the URL
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL], username: getUsername(req) };
+  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL], user: getUser(req) };
   res.render("urls_show", templateVars);
 });
 
@@ -75,10 +104,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-//set a cookie &  log in.
+//set a cookie & log in.
 app.post("/login", (req, res) => {
   const { username } = req.body;
-  console.log(username);
+  //console.log(username);
   res.cookie("username", username);
   res.redirect("/urls");
 });
@@ -106,6 +135,7 @@ const generateRandomString = function() {
 };
 
 //Funtion to check if there is already username Cookies
-const getUsername = function(req) {
-  return req.cookies ? req.cookies['username'] : undefined;
+const getUser = function(req) {
+  const userId = req.cookies ? req.cookies['userId'] : undefined;
+  return userDatabase[userId];
 };
