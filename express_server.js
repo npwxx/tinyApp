@@ -52,8 +52,15 @@ app.get("/register", (req, res) => {
 //saves new user registration to userDatabase
 app.post("/register", (req, res) => {
   const id = generateRandomString();
+  const { email, password } = req.body;
+  if (email === "" || password === "") {
+    return res.sendStatus(400);
+  }
+  if (isEmailUsed(email)) {
+    return res.sendStatus(400);
+  }
   userDatabase[id] = { id: id, email: req.body.email, password: req.body.password };
-  console.log(userDatabase);
+  //console.log(userDatabase);
   res.cookie("userId", id);
   res.redirect("/urls");
 });
@@ -138,4 +145,14 @@ const generateRandomString = function() {
 const getUser = function(req) {
   const userId = req.cookies ? req.cookies['userId'] : undefined;
   return userDatabase[userId];
+};
+
+//function to check is email is already used
+const isEmailUsed = function(email) {
+  for (const userId in userDatabase) {
+    if (email === userDatabase[userId].email) {
+      return true;
+    }
+  }
+  return false;
 };
