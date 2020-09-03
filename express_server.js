@@ -13,8 +13,8 @@ app.set("view engine", "ejs");
 
 //stores URL database in object for easier retrieval
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userId: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userId: "user2RandomID" }
 };
 
 //stores user login &password info
@@ -38,7 +38,11 @@ app.get("/", (req, res) => {
 
 //Brings you to the page to create a new URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: getUser(req) };
+  const user = getUser(req);
+  if (!user) {
+    return res.redirect("/login");
+  }
+  let templateVars = { user };
   res.render("urls_new", templateVars);
   //console.log(getUsername(req));
 });
@@ -92,21 +96,22 @@ app.get("/urls", (req, res) => {
 //renders a page where you can edit the URL
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL], user: getUser(req) };
+  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL].longURL, user: getUser(req) };
   res.render("urls_show", templateVars);
 });
 
 //creates a new URL & redirects back to main page
 app.post("/urls", (req, res) => {
   const { longURL } = req.body;
+  const userId = getUser(req).id;
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userId };
   res.redirect(`/urls/${shortURL}`);
 });
 
 //redirects to long URL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -119,7 +124,7 @@ app.get("/urls.json", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const { longURL } = req.body;
   const { shortURL } = req.params;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect("/urls");
 });
 
