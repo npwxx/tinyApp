@@ -31,7 +31,7 @@ const userDatabase = {
   }
 };
 
-//redirects to index page.
+//redirects to index(/home?) page.
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -56,12 +56,30 @@ app.post("/register", (req, res) => {
   if (email === "" || password === "") {
     return res.sendStatus(400);
   }
-  if (isEmailUsed(email)) {
+  if (getUserByEmail(email)) {
     return res.sendStatus(400);
   }
   userDatabase[id] = { id: id, email: req.body.email, password: req.body.password };
   //console.log(userDatabase);
   res.cookie("userId", id);
+  res.redirect("/urls");
+});
+
+//
+app.get("/login", (req, res) => {
+  let templateVars = { user: getUser(req), };
+  res.render("login", templateVars);
+});
+
+//login.
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  //console.log(username);
+  const user = getUserByEmail(email);
+  if (!user || password !== user.password) {
+    return res.sendStatus(400);
+  }
+  res.cookie("userId", user.id);
   res.redirect("/urls");
 });
 
@@ -111,13 +129,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-//set a cookie & log in.
-app.post("/login", (req, res) => {
-  const { username } = req.body;
-  //console.log(username);
-  res.cookie("username", username);
-  res.redirect("/urls");
-});
 
 //logout deletes the username cookie
 app.post("/logout", (req, res) => {
@@ -129,6 +140,8 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+/*** Helper Functions ***/
 
 //Funtion used to create a random short URL string
 const generateRandomString = function() {
@@ -148,11 +161,11 @@ const getUser = function(req) {
 };
 
 //function to check is email is already used
-const isEmailUsed = function(email) {
+const getUserByEmail = function(email) {
   for (const userId in userDatabase) {
     if (email === userDatabase[userId].email) {
-      return true;
+      return userDatabase[userId];
     }
   }
-  return false;
+  return undefined;
 };
