@@ -134,13 +134,22 @@ app.get("/urls.json", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const { longURL } = req.body;
   const { shortURL } = req.params;
+  const user = getUser(req);
+  if (!user || !urlsForUser(user.id).includes(shortURL)) {
+    return res.sendStatus(404);
+  }
   urlDatabase[shortURL].longURL = longURL;
   res.redirect("/urls");
 });
 
 //deletes a url
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const { shortURL } = req.params;
+  const user = getUser(req);
+  if (!user || !urlsForUser(user.id).includes(shortURL)) {
+    return res.sendStatus(404);
+  }
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
