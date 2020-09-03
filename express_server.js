@@ -132,7 +132,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //logout deletes the username cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("userId");
   res.redirect("/urls");
 });
 
