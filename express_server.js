@@ -89,7 +89,9 @@ app.post("/login", (req, res) => {
 
 //renders the index page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: getUser(req) };
+  const user = getUser(req);
+  const userUrls = user ? urlsForUser(user.id) : [];
+  let templateVars = { urls: urlDatabase, user, userUrls };
   res.render("urls_index", templateVars);
 });
 
@@ -111,7 +113,11 @@ app.post("/urls", (req, res) => {
 
 //redirects to long URL
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const url = urlDatabase[req.params.shortURL];
+  if (!url) {
+    return res.sendStatus(404);
+  }
+  const longURL = url.longURL;
   res.redirect(longURL);
 });
 
@@ -173,4 +179,15 @@ const getUserByEmail = function(email) {
     }
   }
   return undefined;
+};
+
+//function to filter urlDatabase by user
+const urlsForUser = function(id) {
+  let shortURLsArr = [];
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userId === id) {
+      shortURLsArr.push(shortURL);
+    }
+  }
+  return shortURLsArr;
 };
