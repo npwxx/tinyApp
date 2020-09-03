@@ -98,7 +98,11 @@ app.get("/urls", (req, res) => {
 //renders a page where you can edit the URL
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL].longURL, user: getUser(req) };
+  const user = getUser(req);
+  if (!user || !urlsForUser(user.id).includes(shortURL)) {
+    return res.sendStatus(404);
+  }
+  let templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
