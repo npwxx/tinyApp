@@ -4,14 +4,14 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of URLs page when not logged in"](docs/URL-page-when-not-logged-in.png)
 Screenshot of URLs page when not logged in
-!["screenshot of URLs page when logged in"](docs/logged-in-URLs-page.png)
+!["Screenshot of URLs page when not logged in"](docs/URL-page-when-not-logged-in.png)
 Screenshot of URLs page when logged in
-!["Screenshot of Registration page"](docs/registration-page.png)
+!["screenshot of URLs page when logged in"](docs/logged-in-URLs-page.png)
 Screenshot of Registration page
-!["screenshot of Login page"](docs/login-page.png)
+!["Screenshot of Registration page"](docs/registration-page.png)
 Screenshot of Login page
+!["screenshot of Login page"](docs/login-page.png)
 
 ## Dependencies
 
@@ -30,4 +30,4 @@ Screenshot of Login page
 
 ## Author
 - Author: Nicole Woodcock 
-- github: <@npwxx>
+- github: <github.com/npwxx>
