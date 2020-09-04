@@ -1,22 +1,20 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-//const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const { generateRandomString } = require('./util');
 const { urlDatabase, userDatabase, getUser, getUserByEmail, urlsForUser } = require("./db");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 app.use(cookieSession({ name: 'session', secret: generateRandomString() }));
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
-//redirects to index(/home?) page.
+//redirects to index page.
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -29,7 +27,6 @@ app.get("/urls/new", (req, res) => {
   }
   let templateVars = { user };
   res.render("urls_new", templateVars);
-  //console.log(getUsername(req));
 });
 
 //Brings you to the register page
@@ -50,7 +47,7 @@ app.post("/register", (req, res) => {
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
   userDatabase[id] = { id: id, email: req.body.email, hashedPassword };
-  console.log(userDatabase);
+  //console.log(userDatabase);
   req.session.userId = id;
   res.redirect("/urls");
 });
