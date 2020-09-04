@@ -1,36 +1,20 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const cookieParser = require("cookie-parser");
+//const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
+const { generateRandomString } = require('./util');
+const { urlDatabase, userDatabase, getUser, getUserByEmail, urlsForUser } = require("./db");
 const app = express();
 const PORT = 8080; // default port 8080
 
+app.use(cookieSession({ name: 'session', secret: generateRandomString() }));
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+//app.use(cookieParser());
 
 app.set("view engine", "ejs");
-
-//stores URL database in object for easier retrieval
-const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userId: "userRandomID" },
-  "9sm5xK": { longURL: "http://www.google.com", userId: "user2RandomID" }
-};
-
-//stores user login &password info
-const userDatabase = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
 
 //redirects to index(/home?) page.
 app.get("/", (req, res) => {
@@ -67,7 +51,7 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   userDatabase[id] = { id: id, email: req.body.email, hashedPassword };
   console.log(userDatabase);
-  res.cookie("userId", id);
+  req.session.userId = id;
   res.redirect("/urls");
 });
 
@@ -85,7 +69,7 @@ app.post("/login", (req, res) => {
   if (!user || !bcrypt.compareSync(password, user.hashedPassword)) {
     return res.sendStatus(400);
   }
-  res.cookie("userId", user.id);
+  req.session.userId = user.id;
   res.redirect("/urls");
 });
 
@@ -155,10 +139,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-
-//logout deletes the username cookie
+//logout deletes the cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("userId");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -166,43 +149,3 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-/*** Helper Functions ***/
-
-//Funtion used to create a random short URL string
-const generateRandomString = function() {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVabcdefghijklmnopqrstuvwxyz0123456789';
-  let charactersLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    result += characters[Math.floor(Math.random() * charactersLength)];
-  }
-  return result;
-};
-
-//Funtion to check if there is already username Cookies
-const getUser = function(req) {
-  const userId = req.cookies ? req.cookies['userId'] : undefined;
-  return userDatabase[userId];
-};
-
-//function to check is email is already used
-const getUserByEmail = function(email) {
-  for (const userId in userDatabase) {
-    if (email === userDatabase[userId].email) {
-      return userDatabase[userId];
-    }
-  }
-  return undefined;
-};
-
-//function to filter urlDatabase by user
-const urlsForUser = function(id) {
-  let shortURLsArr = [];
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userId === id) {
-      shortURLsArr.push(shortURL);
-    }
-  }
-  return shortURLsArr;
-};
